@@ -1,52 +1,55 @@
 #include <iostream>
-#include <cmath>
 #include <chrono>
 using namespace std;
 using namespace std::chrono;
-int vec[1000001];
-bool apare = false;
-void cb() {
-	int st = 1,
-		dr = 1000000;
-	int mij = 0;
-	while (st <= dr) {
-		mij = (st + dr) / 2;
-		if (vec[mij] == 19000000) {
-			apare = true;
-			return;
-		}
-		else if (vec[mij] > 19000000) dr = mij - 1;
-		else st = mij + 1;
-	}
-	return;
+typedef unsigned long long ull;
+int n, k;
+int contor_pasi = 0;
+ull Pascal(int n, int k) {
+    ++contor_pasi;
+    if (n == k || k == 0)
+        return 1;
+    return Pascal(n - 1, k - 1) + Pascal(n - 1, k);
 }
-void cautare_secv() {
-	for (int i = 1; i <= 1000000; ++i) 
-		if (vec[i] == 19000000) {
-			apare = true;
-			return;
-		}
+ull comb_form_rec(ull**Comb,int n, int k) {
+    ++contor_pasi;
+    if (n == k || k == 0)
+        return 1;
+    if (Comb[n - 1][k - 1] == 0)
+        Comb[n - 1][k - 1] = comb_form_rec(Comb,n - 1, k - 1);
+    if (Comb[n - 1][k] == 0)
+        Comb[n - 1][k] = comb_form_rec(Comb,n - 1, k);
+    return Comb[n - 1][k - 1] + Comb[n - 1][k];
 }
 int main() {
-	for (int i = 1; i <= 1000000; ++i) 
-		vec[i] = i*(int)log2(i); 
-	auto start = high_resolution_clock::now();
-	cb();
-	auto stop = high_resolution_clock::now();
-	auto timp = duration_cast<nanoseconds>(stop - start);
-	cout << (apare == 1);
-	cout << "\nnanosecunde: "<<timp.count() << "\nsecunde: " << 
-		timp.count() * std::pow(10,-9);
+    cin >> n >> k;
+    ull **Comb = new ull*[n + 1];
+    for (int i = 0; i <= n; ++i) Comb[i] = new ull[n + 1];
+    for (int i = 0; i <= n; ++i)
+        for (int j = 0; j <= n; ++j) Comb[i][j] = 0;
 
-	apare = false;
+    auto start = high_resolution_clock::now();
+    cout << "C("<<n<<","<<k<<")= " << Pascal(n, k) <<
+        "\nnumarul de pasi: " << contor_pasi;
+    auto stop = high_resolution_clock::now();
+    auto timp = duration_cast<microseconds>(stop - start);
+    cout << "\nmicrosecunde: " << timp.count() << "\nsecunde: "
+        << timp.count() * pow(10, -6);
 
-	start = high_resolution_clock::now();
-	cautare_secv();
-	stop = high_resolution_clock::now();
-	timp = duration_cast<nanoseconds>(stop - start);
-	cout << '\n'<<(apare == 1);
-	cout << "\nnanosecunde: " << timp.count() << "\nsecunde: " <<
-		timp.count() * std::pow(10, -9);
+    contor_pasi = 0;
 
-	return  0;
+    start = high_resolution_clock::now();
+    cout << "\n\nFolosind memoizare:\nC(" << n << "," << k <<
+        ")= " << comb_form_rec(Comb,n, k) <<
+        "\nnumarul de pasi: " << contor_pasi;
+    stop = high_resolution_clock::now();
+    timp = duration_cast<microseconds>(stop - start);
+    cout << "\nmicrosecunde: " << timp.count() << "\nsecunde: "
+        << timp.count() * pow(10, -6);
+
+    for (int i = 1; i <= n; ++i)
+        delete[]Comb[i];
+    delete[]Comb;
+    Comb = NULL;
+    return 0;
 }
